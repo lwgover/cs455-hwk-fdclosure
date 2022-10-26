@@ -1,12 +1,14 @@
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Arrays;
 
 /**
  * This utility class is not meant to be instantitated, and just provides some
  * useful methods on FD sets.
  * 
- * @author <<YOUR NAME>>
- * @version <<DATE>>
+ * @author Lucas Gover
+ * @version 10 / 25 / 2022
  */
 public final class FDUtil {
 
@@ -17,10 +19,23 @@ public final class FDUtil {
    * @return a set of trivial FDs with respect to the given FDSet
    */
   public static FDSet trivial(final FDSet fdset) {
-    // TODO: Obtain the power set of each FD's left-hand attributes. For each
+    // Obtain the power set of each FD's left-hand attributes. For each
     // element in the power set, create a new FD and add it to the a new FDSet.
+    FDSet newFDSet = new FDSet();
+    Iterator<FD> iter = fdset.iterator();
+    while(iter.hasNext()){
+      FD current = iter.next();
+      Set<Set<String>> pset = powerSet(current.getLeft());
+      Iterator<Set<String>> iter2 = pset.iterator();
+      while(iter2.hasNext()){
+        Set<String> next = iter2.next();
+        if(next.size() > 0){ // don't add {"A","B"} --> {}
+          newFDSet.add(new FD(current.getLeft(),next));
+        }
+      }
+    }
 
-    return null;
+    return newFDSet;
   }
 
   /**
@@ -31,10 +46,21 @@ public final class FDUtil {
    * @return a set of augmented FDs
    */
   public static FDSet augment(final FDSet fdset, final Set<String> attrs) {
-    // TODO: Copy each FD in the given set and then union both sides with the given
+    // Copy each FD in the given set and then union both sides with the given
     // set of attributes, and add this augmented FD to a new FDSet.
-
-    return null;
+    FDSet newSet = new FDSet();
+    Iterator<FD> iter = fdset.iterator();
+    while(iter.hasNext()){
+      FD next = iter.next();
+      
+      for(String attr : attrs){
+        FD newFD = new FD(next);
+        newFD.addToLeft(new HashSet<String>(Arrays.asList(attr)));
+        newFD.addToRight(new HashSet<String>(Arrays.asList(attr)));
+        newSet.add(newFD);
+      }
+    }
+    return newSet;
   }
 
   /**
@@ -44,11 +70,30 @@ public final class FDUtil {
    * @return all transitive FDs with respect to the input FD set
    */
   public static FDSet transitive(final FDSet fdset) {
-    // TODO: Examine each pair of FDs in the given set. If the transitive property
+    // Examine each pair of FDs in the given set. If the transitive property
     // holds on the pair of FDs, then generate the new FD and add it to a new FDSet.
     // Repeat until no new transitive FDs are found.
-
-    return null;
+    FDSet newSet = new FDSet();
+    Iterator<FD> iter1 = fdset.iterator();
+    FD left;
+    FD right;
+    FD newFD;
+    int startSize;
+    do{
+      startSize = newSet.size();
+      while(iter1.hasNext()){
+        Iterator<FD> iter2 = fdset.iterator();
+        left = iter1.next();
+        while(iter2.hasNext()){
+          right = iter2.next();
+          if(left.getRight().equals(right.getLeft())){
+            newFD = new FD(left.getLeft(),right.getRight()); 
+            newSet.add(newFD);
+          }
+        }
+      }
+    }while(newSet.size() > startSize);
+    return newSet;
   }
 
   /**
@@ -58,13 +103,17 @@ public final class FDUtil {
    * @return the closure of the input FD Set
    */
   public static FDSet fdSetClosure(final FDSet fdset) {
-    // TODO: Use the FDSet copy constructor to deep copy the given FDSet
+    FDSet newSet = new FDSet(fdset); //Use the FDSet copy constructor to deep copy the given FDSet
+    int startSize;
+    //Generate new FDs by applying Trivial and Augmentation Rules, followed
+    do{
+      startSize  = newSet.size();
+      newSet.addAll(trivial(newSet));
+      newSet.addAll(augment(newSet,getSingletons(fdset)));
+    }while(startSize < newSet.size()); // Repeat until no further changes are detected.
+    newSet.addAll(transitive(newSet)); // by Transitivity Rule, and add new FDs to the result.
 
-    // TODO: Generate new FDs by applying Trivial and Augmentation Rules, followed
-    // by Transitivity Rule, and add new FDs to the result.
-    // Repeat until no further changes are detected.
-
-    return null;
+    return newSet;
   }
 
   /**
@@ -104,5 +153,13 @@ public final class FDUtil {
     }
     currentPset.addAll(otherPset);
     return currentPset;
+  }
+  private static Set<String> getSingletons(FDSet f){
+    HashSet<String> newSet = new HashSet<>();
+    for(FD fd:f){
+      newSet.addAll(fd.getLeft());
+      newSet.addAll(fd.getRight());
+    }
+    return newSet;
   }
 }
