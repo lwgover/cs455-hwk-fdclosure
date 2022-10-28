@@ -1,13 +1,17 @@
 import static org.junit.Assert.*;
-
-
-
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+/**
+ * Tests your FDUtil Package
+ *
+ * @author Lucas Gover
+ * @version 10 / 26 / 2022
+ */
 
 public class FDUtilTest {
     FDSet fdset;
@@ -65,7 +69,7 @@ public class FDUtilTest {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
         fdset = new FDSet(fd1);
         FDSet fdset2 = new FDSet(fd1);
-        FDSet trivial = FDUtil.trivial(fdset);
+        FDUtil.trivial(fdset);
         assertEquals(fdset, fdset2);
     }
 
@@ -77,7 +81,7 @@ public class FDUtilTest {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
         fdset = new FDSet(fd1);
         FDSet fdset2 = new FDSet(fd1);
-        FDSet augment = FDUtil.augment(fdset,Set.of("A","B","C"));
+        FDUtil.augment(fdset,Set.of("A","B","C"));
         assertEquals(fdset, fdset2);
     }
 
@@ -90,7 +94,7 @@ public class FDUtilTest {
         FD fd2 = new FD(List.of("C"), List.of("D"));
         fdset = new FDSet(fd1);
         fdset.add(fd2);
-        FDSet transitive = FDUtil.transitive(fdset);
+        FDUtil.transitive(fdset);
         FDSet fdset2 = new FDSet(fd1);
         fdset2.add(fd2);
         assertEquals(fdset,  fdset2);
@@ -135,5 +139,4 @@ public class FDUtilTest {
         assertTrue(setClosure.getSet().contains(new FD(List.of("A","B","C"), List.of("A","B","C"))));//        ABC --> ABC
         assertEquals(setClosure.size(),28); // check you didn't add any extras
     }
-
 }
