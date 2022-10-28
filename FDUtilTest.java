@@ -57,7 +57,9 @@ public class FDUtilTest {
         FDSet correct = new FDSet(new FD(Arrays.asList("A","B"), List.of("D"))); // final answer should contain AB -> AC
         assertTrue(transitive.getSet().containsAll(correct.getSet()));
     }
-
+    /**
+     * Trivial doesn't modify input
+     */
     @Test
     public void trivialNoModificaiton() {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
@@ -67,6 +69,9 @@ public class FDUtilTest {
         assertEquals(fdset, fdset2);
     }
 
+    /**
+     * Augment doesn't modify input
+     */
     @Test
     public void augmentNoModificaiton() {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
@@ -76,6 +81,9 @@ public class FDUtilTest {
         assertEquals(fdset, fdset2);
     }
 
+    /**
+     * transitive doesn't modify input
+     */
     @Test
     public void transitiveNoModificaiton() {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
