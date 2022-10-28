@@ -24,10 +24,10 @@ public class FDUtilTest {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
         fdset = new FDSet(fd1);
         FDSet trivial = FDUtil.trivial(fdset);
-        FDSet correct = new FDSet(new FD(Arrays.asList("A","B"), List.of("A"))); // final answer should contain AB -> A
-        correct.add(new FD(Arrays.asList("A","B"), List.of("B"))); //                                           AB -> B
-        correct.add(new FD(Arrays.asList("A","B"), List.of("A","B")));//                                        AB -> AB
-        assertTrue(trivial.getSet().containsAll(correct.getSet()));
+        assertTrue(trivial.getSet().contains(new FD(Arrays.asList("A","B"), List.of("A")))); // trivial should contain A B -> A
+        assertTrue(trivial.getSet().contains(new FD(Arrays.asList("A","B"), List.of("B")))); // trivial should contain A B -> B
+        assertTrue(trivial.getSet().contains(new FD(Arrays.asList("A","B"), List.of("A","B"))));//      should contain A B -> A B
+        assertEquals(trivial.size(),3); // check you didn't add any extras
     }
 
     /**
@@ -38,10 +38,10 @@ public class FDUtilTest {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
         fdset = new FDSet(fd1);
         FDSet augment = FDUtil.augment(fdset,Set.of("A","B","C"));
-        FDSet correct = new FDSet(new FD(Arrays.asList("A","B"), List.of("A","C"))); // final answer should contain AB -> AC
-        correct.add(new FD(Arrays.asList("A","B"), List.of("B","C"))); //                                           AB -> BC
-        correct.add(new FD(Arrays.asList("A","B","C"), List.of("C")));//                                                AB -> C
-        assertTrue(augment.getSet().containsAll(correct.getSet()));
+        assertTrue(augment.getSet().contains(new FD(Arrays.asList("A","B"), List.of("A","C")))); // augment's return should include AB -> AC
+        assertTrue(augment.getSet().contains(new FD(Arrays.asList("A","B"), List.of("B","C")))); // augment's return should include AB -> BC
+        assertTrue(augment.getSet().contains(new FD(Arrays.asList("A","B","C"), List.of("C")))); // augment's return should include ABC -> C
+        assertEquals(augment.size(),3);
     }
 
     /**
@@ -54,11 +54,11 @@ public class FDUtilTest {
         fdset = new FDSet(fd1);
         fdset.add(fd2);
         FDSet transitive = FDUtil.transitive(fdset);
-        FDSet correct = new FDSet(new FD(Arrays.asList("A","B"), List.of("D"))); // final answer should contain AB -> AC
-        assertTrue(transitive.getSet().containsAll(correct.getSet()));
+        assertTrue(transitive.getSet().contains(new FD(Arrays.asList("A","B"), List.of("D")))); // transitive's return should include AB -> D
+        assertEquals(transitive.size(),1); // shouldn't return anything else
     }
     /**
-     * Trivial doesn't modify input
+     * Trivial doesn't modify input. If you fail this test you probably made a shallow copy somewhere.
      */
     @Test
     public void trivialNoModificaiton() {
@@ -70,7 +70,7 @@ public class FDUtilTest {
     }
 
     /**
-     * Augment doesn't modify input
+     * Augment doesn't modify input. If you fail this test you probably made a shallow copy somewhere.
      */
     @Test
     public void augmentNoModificaiton() {
@@ -82,16 +82,58 @@ public class FDUtilTest {
     }
 
     /**
-     * transitive doesn't modify input
+     * transitive doesn't modify input. If you fail this test you probably made a shallow copy somewhere.
      */
     @Test
     public void transitiveNoModificaiton() {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
+        FD fd2 = new FD(List.of("C"), List.of("D"));
         fdset = new FDSet(fd1);
-        FDSet fdset2 = new FDSet(fd1);
+        fdset.add(fd2);
         FDSet transitive = FDUtil.transitive(fdset);
+        FDSet fdset2 = new FDSet(fd1);
+        fdset2.add(fd2);
         assertEquals(fdset,  fdset2);
     }
 
+    /**
+     * Unit test for SetClosure
+     */
+    @Test
+    public void fdSetClosure() {
+        FD fd1 = new FD(List.of("A"), List.of("B")); // A --> B
+        FD fd2 = new FD(Arrays.asList("A", "B"), List.of("C"));  // AB --> C
+        fdset = new FDSet(fd1,fd2);
+        FDSet setClosure = FDUtil.fdSetClosure(fdset);
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A"), List.of("A")))); //        A --> A
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A"), List.of("B"))));//        A --> B
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A"), List.of("B"))));//        A --> C
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A"), List.of("A","B"))));//        A --> AB
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A"), List.of("A","C"))));//        A --> AC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A"), List.of("B","C"))));//        A --> BC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A"), List.of("A","B","C"))));//        A --> ABC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B"), List.of("A"))));//        AB --> A
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B"), List.of("B"))));//        AB --> B
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B"), List.of("C"))));//        AB --> C
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B"), List.of("A","B"))));//        AB --> AB
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B"), List.of("A","C"))));//        AB --> AC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B"), List.of("B","C"))));//        AB --> BC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B"), List.of("A","B","C"))));//        AB --> ABC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","C"), List.of("A"))));//        AC --> A
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","C"), List.of("B"))));//        AC --> B
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","C"), List.of("C"))));//        AC --> C
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","C"), List.of("A","B"))));//        AC --> AB
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","C"), List.of("A","C"))));//        AC --> AC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","C"), List.of("B","C"))));//        AC --> BC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","C"), List.of("A","B","C"))));//        AC --> ABC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B","C"), List.of("A"))));//        ABC --> A
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B","C"), List.of("B"))));//        ABC --> B
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B","C"), List.of("C"))));//        ABC --> C
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B","C"), List.of("A","B"))));//        ABC --> AB
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B","C"), List.of("A","C"))));//        ABC --> AC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B","C"), List.of("B","C"))));//        ABC --> BC
+        assertTrue(setClosure.getSet().contains(new FD(List.of("A","B","C"), List.of("A","B","C"))));//        ABC --> ABC
+        assertEquals(setClosure.size(),28); // check you didn't add any extras
+    }
 
 }
