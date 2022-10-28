@@ -68,9 +68,9 @@ public class FDUtilTest {
     public void trivialNoModificaiton() {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
         fdset = new FDSet(fd1);
-        FDSet fdset2 = new FDSet(fd1);
         FDUtil.trivial(fdset);
-        assertEquals(fdset, fdset2);
+        assertEquals(fdset.size(), 1); // check input size is the same
+        assertTrue(fdset.getSet().contains(new FD(Arrays.asList("A","B"), List.of("C")))); // checks that elements are the same
     }
 
     /**
@@ -80,9 +80,9 @@ public class FDUtilTest {
     public void augmentNoModificaiton() {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
         fdset = new FDSet(fd1);
-        FDSet fdset2 = new FDSet(fd1);
         FDUtil.augment(fdset,Set.of("A","B","C"));
-        assertEquals(fdset, fdset2);
+        assertEquals(fdset.size(), 1); // check input size is the same
+        assertTrue(fdset.getSet().contains(new FD(Arrays.asList("A","B"), List.of("C")))); // checks that elements are the same
     }
 
     /**
@@ -92,12 +92,11 @@ public class FDUtilTest {
     public void transitiveNoModificaiton() {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
         FD fd2 = new FD(List.of("C"), List.of("D"));
-        fdset = new FDSet(fd1);
-        fdset.add(fd2);
+        fdset = new FDSet(fd1,fd2);
         FDUtil.transitive(fdset);
-        FDSet fdset2 = new FDSet(fd1);
-        fdset2.add(fd2);
-        assertEquals(fdset,  fdset2);
+        assertEquals(fdset.size(), 2); // check input size is the same
+        assertTrue(fdset.getSet().contains(new FD(Arrays.asList("A","B"), List.of("C")))); // checks that elements are the same
+        assertTrue(fdset.getSet().contains(new FD(List.of("C"), List.of("D")))); // checks that elements are the same
     }
 
     /**
