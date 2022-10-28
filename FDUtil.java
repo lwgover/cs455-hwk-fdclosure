@@ -1,7 +1,4 @@
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * This utility class is not meant to be instantitated, and just provides some
@@ -22,15 +19,11 @@ public final class FDUtil {
     // Obtain the power set of each FD's left-hand attributes. For each
     // element in the power set, create a new FD and add it to the a new FDSet.
     FDSet newFDSet = new FDSet();
-    Iterator<FD> iter = fdset.iterator();
-    while(iter.hasNext()){
-      FD current = iter.next();
-      Set<Set<String>> pset = powerSet(current.getLeft());
-      Iterator<Set<String>> iter2 = pset.iterator();
-      while(iter2.hasNext()){
-        Set<String> next = iter2.next();
-        if(next.size() > 0){ // don't add {"A","B"} --> {}
-          newFDSet.add(new FD(current.getLeft(),next));
+    for (FD current : fdset) { // for every FD in the FDSet,
+      Set<Set<String>> pset = powerSet(current.getLeft()); // get power set of each FD's left hand attr.
+      for (Set<String> next : pset) {
+        if (next.size() > 0) { // don't add {"A","B"} --> {}
+          newFDSet.add(new FD(current.getLeft(), next)); // make a trivial FD
         }
       }
     }
@@ -49,14 +42,11 @@ public final class FDUtil {
     // Copy each FD in the given set and then union both sides with the given
     // set of attributes, and add this augmented FD to a new FDSet.
     FDSet newSet = new FDSet();
-    Iterator<FD> iter = fdset.iterator();
-    while(iter.hasNext()){
-      FD next = iter.next();
-      
-      for(String attr : attrs){
+    for (FD next : fdset) { // for each FD in FDSet
+      for (String attr : attrs) { // for each attr in attrs.
         FD newFD = new FD(next);
-        newFD.addToLeft(new HashSet<String>(Arrays.asList(attr)));
-        newFD.addToRight(new HashSet<String>(Arrays.asList(attr)));
+        newFD.addToLeft(new HashSet<>(List.of(attr))); // augment the value to both sides
+        newFD.addToRight(new HashSet<>(List.of(attr)));
         newSet.add(newFD);
       }
     }

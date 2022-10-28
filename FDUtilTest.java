@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Tests your FDUtil Package
+ * Tests your FDUtil Class
  *
  * @author Lucas Gover
  * @version 10 / 26 / 2022
