@@ -41,11 +41,9 @@ public class FDUtilTest {
     public void testAugment() {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
         fdset = new FDSet(fd1);
-        FDSet augment = FDUtil.augment(fdset,Set.of("A","B","C"));
-        assertTrue(augment.getSet().contains(new FD(Arrays.asList("A","B"), List.of("A","C")))); // augment's return should include AB -> AC
-        assertTrue(augment.getSet().contains(new FD(Arrays.asList("A","B"), List.of("B","C")))); // augment's return should include AB -> BC
-        assertTrue(augment.getSet().contains(new FD(Arrays.asList("A","B","C"), List.of("C")))); // augment's return should include ABC -> C
-        assertEquals(augment.size(),3);
+        FDSet augment = FDUtil.augment(fdset,Set.of("D"));
+        assertTrue(augment.getSet().contains(new FD(Arrays.asList("A","B","D"), List.of("D","C")))); // checks that elements are the same
+        assertEquals(augment.size(),1);
     }
 
     /**
@@ -80,7 +78,7 @@ public class FDUtilTest {
     public void augmentNoModificaiton() {
         FD fd1 = new FD(Arrays.asList("A","B"), List.of("C"));
         fdset = new FDSet(fd1);
-        FDUtil.augment(fdset,Set.of("A","B","C"));
+        FDUtil.augment(fdset,Set.of("D"));
         assertEquals(fdset.size(), 1); // check input size is the same
         assertTrue(fdset.getSet().contains(new FD(Arrays.asList("A","B"), List.of("C")))); // checks that elements are the same
     }

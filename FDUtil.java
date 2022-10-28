@@ -43,12 +43,10 @@ public final class FDUtil {
     // set of attributes, and add this augmented FD to a new FDSet.
     FDSet newSet = new FDSet();
     for (FD next : fdset) { // for each FD in FDSet
-      for (String attr : attrs) { // for each attr in attrs.
-        FD newFD = new FD(next);
-        newFD.addToLeft(new HashSet<>(List.of(attr))); // augment the value to both sides
-        newFD.addToRight(new HashSet<>(List.of(attr)));
-        newSet.add(newFD);
-      }
+      FD newFD = new FD(next);
+      newFD.addToLeft(attrs); // augment the value to both sides
+      newFD.addToRight(attrs);
+      newSet.add(newFD);
     }
     return newSet;
   }
@@ -99,7 +97,10 @@ public final class FDUtil {
     do{
       startSize  = newSet.size();
       newSet.addAll(trivial(newSet));
-      newSet.addAll(augment(newSet,getSingletons(fdset)));
+      Set<Set<String>> pSetOfSingletons = powerSet(getSingletons(fdset));
+      for(Set<String> subset : pSetOfSingletons) {
+        newSet.addAll(augment(newSet, subset));
+      }
     }while(startSize < newSet.size()); // Repeat until no further changes are detected.
     newSet.addAll(transitive(newSet)); // by Transitivity Rule, and add new FDs to the result.
 
